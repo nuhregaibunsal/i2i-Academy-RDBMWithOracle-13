@@ -1,11 +1,9 @@
 package com.i2i.academy.rdbms.dto;
 
 public record BookDto(
-        long bookId,
+        long id,
         String title,
-        String isbn,
-        Integer publicationYear,
-        String authorName,
-        String publisherName
+        String author,
+        String publisher
 ) {
 }

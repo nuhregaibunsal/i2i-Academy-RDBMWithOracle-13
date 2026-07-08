@@ -26,8 +26,10 @@ public class BookService {
     private static final int ORA_USER_ERROR_MAX = 20000;
     private static final int ORA_USER_ERROR_MIN = 20999;
 
-    private static final String CALL_IMPORT = "{ call book_mgmt_pkg.prc_import_books(?, ?, ?) }";
-    private static final String CALL_FETCH  = "{ call book_mgmt_pkg.prc_fetch_books(?) }";
+    private static final String CALL_TO_XML  = "{ ? = call book_operations.fn_to_xml(?) }";
+    private static final String CALL_TO_JSON = "{ ? = call book_operations.fn_to_json(?) }";
+    private static final String CALL_IMPORT  = "{ call book_operations.prc_import_books(?, ?, ?, ?) }";
+    private static final String CALL_FETCH   = "{ call book_operations.prc_fetch_books(?) }";
 
     private final DataSource dataSource;
 
@@ -36,24 +38,43 @@ public class BookService {
     }
 
     public ImportResponse importBooks(String rawPayload) throws SQLException {
-        try (Connection conn = dataSource.getConnection();
-             CallableStatement cs = conn.prepareCall(CALL_IMPORT)) {
-
-            Clob payload = conn.createClob();
-            payload.setString(1, rawPayload);
-
-            cs.setClob(1, payload);
-            cs.registerOutParameter(2, Types.NUMERIC);
-            cs.registerOutParameter(3, Types.VARCHAR);
-            cs.execute();
-
-            int inserted = cs.getInt(2);
-            String message = cs.getString(3);
-            log.debug("Import completed: {} row(s)", inserted);
-            return new ImportResponse(inserted, message);
-
+        try (Connection conn = dataSource.getConnection()) {
+            String xml = transform(conn, CALL_TO_XML, rawPayload);
+            String json = transform(conn, CALL_TO_JSON, rawPayload);
+            return persist(conn, xml, json);
         } catch (SQLException ex) {
             throw translate(ex);
+        }
+    }
+
+    private String transform(Connection conn, String call, String rawPayload) throws SQLException {
+        try (CallableStatement cs = conn.prepareCall(call)) {
+            Clob payload = conn.createClob();
+            payload.setString(1, rawPayload);
+            cs.registerOutParameter(1, Types.CLOB);
+            cs.setClob(2, payload);
+            cs.execute();
+            return cs.getString(1);
+        }
+    }
+
+    private ImportResponse persist(Connection conn, String xml, String json) throws SQLException {
+        try (CallableStatement cs = conn.prepareCall(CALL_IMPORT)) {
+            Clob xmlClob = conn.createClob();
+            xmlClob.setString(1, xml);
+            Clob jsonClob = conn.createClob();
+            jsonClob.setString(1, json);
+
+            cs.setClob(1, xmlClob);
+            cs.setClob(2, jsonClob);
+            cs.registerOutParameter(3, Types.NUMERIC);
+            cs.registerOutParameter(4, Types.VARCHAR);
+            cs.execute();
+
+            int inserted = cs.getInt(3);
+            String message = cs.getString(4);
+            log.debug("Import completed: {} row(s)", inserted);
+            return new ImportResponse(inserted, message);
         }
     }
 
@@ -70,8 +91,6 @@ public class BookService {
                     books.add(new BookDto(
                             rs.getLong("book_id"),
                             rs.getString("title"),
-                            rs.getString("isbn"),
-                            (Integer) rs.getObject("publication_year"),
                             rs.getString("author_name"),
                             rs.getString("publisher_name")
                     ));

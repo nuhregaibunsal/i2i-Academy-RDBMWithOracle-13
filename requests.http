@@ -1,8 +1,8 @@
-### Import books (raw delimited payload)  ->  201 Created
+### Import books (raw delimited payload: title|author|publisher, records split by ~)  ->  201 Created
 POST http://localhost:8080/api/books/import
 Content-Type: text/plain
 
-Clean Code|9780132350884|2008|Robert|Martin|1965|Prentice Hall|USA~Refactoring|9780201485677|1999|Martin|Fowler|1963|Addison-Wesley|USA~The Pragmatic Programmer|9780201616224|1999|Andrew|Hunt|1964|Addison-Wesley|USA
+Clean Code|Robert Martin|Prentice Hall~Refactoring|Martin Fowler|Addison-Wesley~The Pragmatic Programmer|Andrew Hunt|Addison-Wesley
 
 ### List the normalised catalogue  ->  200 OK (JSON array)
 GET http://localhost:8080/api/books
@@ -11,7 +11,7 @@ GET http://localhost:8080/api/books
 POST http://localhost:8080/api/books/import
 Content-Type: text/plain
 
-Broken Book|123
+Broken Book|OnlyAuthor
 
 ### Empty payload  ->  400 Bad Request (ORA-20001)
 POST http://localhost:8080/api/books/import
