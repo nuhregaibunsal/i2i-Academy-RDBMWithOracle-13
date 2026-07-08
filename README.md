@@ -48,7 +48,8 @@ docker compose up --build
 ```
 On startup the backend waits for Oracle to become healthy, then Flyway applies
 `V1 → V2 → V3`, creating the schema, the audit trigger and the `BOOK_OPERATIONS`
-package. The API is then available at `http://localhost:8080`.
+package. The API is then available at `http://localhost:8081` (the host port is
+mapped in `docker-compose.yml`; change it there if `8081` is taken).
 
 ## Connect with DBeaver
 | Setting  | Value              |

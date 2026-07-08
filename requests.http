@@ -1,19 +1,19 @@
 ### Import books (raw delimited payload: title|author|publisher, records split by ~)  ->  201 Created
-POST http://localhost:8080/api/books/import
+POST http://localhost:8081/api/books/import
 Content-Type: text/plain
 
 Clean Code|Robert Martin|Prentice Hall~Refactoring|Martin Fowler|Addison-Wesley~The Pragmatic Programmer|Andrew Hunt|Addison-Wesley
 
 ### List the normalised catalogue  ->  200 OK (JSON array)
-GET http://localhost:8080/api/books
+GET http://localhost:8081/api/books
 
 ### Malformed record (missing fields)  ->  400 Bad Request (ORA-20002)
-POST http://localhost:8080/api/books/import
+POST http://localhost:8081/api/books/import
 Content-Type: text/plain
 
 Broken Book|OnlyAuthor
 
 ### Empty payload  ->  400 Bad Request (ORA-20001)
-POST http://localhost:8080/api/books/import
+POST http://localhost:8081/api/books/import
 Content-Type: text/plain
 
