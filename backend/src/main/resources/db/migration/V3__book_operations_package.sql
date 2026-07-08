@@ -19,6 +19,7 @@ CREATE OR REPLACE PACKAGE book_operations AS
   PROCEDURE prc_fetch_books (p_result OUT SYS_REFCURSOR);
 
 END book_operations;
+/
 
 CREATE OR REPLACE PACKAGE BODY book_operations AS
 
@@ -72,7 +73,7 @@ CREATE OR REPLACE PACKAGE BODY book_operations AS
             SELECT TRIM(REGEXP_SUBSTR(p_raw, '[^~]+', 1, LEVEL)) AS rec,
                    LEVEL AS rn
               FROM dual
-           CONNECT BY REGEXP_SUBSTR(p_raw, '[^~]+', 1, LEVEL) IS NOT NULL
+           CONNECT BY LEVEL <= REGEXP_COUNT(p_raw, '~') + 1
           )
       );
 
@@ -103,7 +104,7 @@ CREATE OR REPLACE PACKAGE BODY book_operations AS
             SELECT TRIM(REGEXP_SUBSTR(p_raw, '[^~]+', 1, LEVEL)) AS rec,
                    LEVEL AS rn
               FROM dual
-           CONNECT BY REGEXP_SUBSTR(p_raw, '[^~]+', 1, LEVEL) IS NOT NULL
+           CONNECT BY LEVEL <= REGEXP_COUNT(p_raw, '~') + 1
           )
       );
 
@@ -210,3 +211,4 @@ CREATE OR REPLACE PACKAGE BODY book_operations AS
   END prc_fetch_books;
 
 END book_operations;
+/

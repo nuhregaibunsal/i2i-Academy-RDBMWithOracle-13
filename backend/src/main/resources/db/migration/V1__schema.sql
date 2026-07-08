@@ -37,5 +37,7 @@ CREATE OR REPLACE TYPE book_detail_obj AS OBJECT (
   author_name    VARCHAR2(200),
   publisher_name VARCHAR2(200)
 );
+/
 
 CREATE OR REPLACE TYPE book_detail_tab AS TABLE OF book_detail_obj;
+/
